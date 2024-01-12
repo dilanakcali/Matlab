@@ -1,0 +1,50 @@
+classdef myapp < matlab.apps.AppBase
+    properties (Access = public)
+        UIFigure  matlab.ui.Figure
+        UIAxes    matlab.ui.control.UIAxes
+    end
+    methods (Access = private)
+        function createComponents(app)
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 460 374];
+            app.UIFigure.Name = 'MATLAB App';
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Title')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.XTick = 0.5;
+            app.UIAxes.Position = [29 161 300 185];
+            app.UIFigure.Visible = 'on';
+        end
+    end
+    methods (Access = public)
+        function app = myapp
+            createComponents(app)
+            registerApp(app, app.UIFigure)
+            if nargout == 0
+                clear app
+            end
+        end
+        function delete(app)
+
+            delete(app.UIFigure)
+        end
+    end
+end
+%KODUN AÇIKLANMASI
+
+%1. `classdef myapp < matlab.apps.AppBase`: `myapp` sınıfı, App Designer'ın temel sınıfı olan `matlab.apps.AppBase` sınıfından türetilmiştir.
+
+%2. `properties (Access = public)`: `UIFigure` (pencere) ve `UIAxes` (eksen) olmak üzere iki genel erişimli özellik içerir.
+
+%3. `methods (Access = private)`: `createComponents` adında özel bir metod, uygulama arayüzünü oluşturur.
+
+%4. `function createComponents(app)`: Bu metod, bir pencere ve bir eksen içeren GUI komponentlerini oluşturur.
+
+%5. `methods (Access = public)`: Uygulamanın oluşturulması (`myapp` constructor) ve silinmesi (`delete` metod) ile ilgili genel metotlar içerir.
+
+%6. `function app = myapp`: Sınıfın constructor'ıdır. `createComponents` metodunu çağırarak uygulama bileşenlerini oluşturur.
+
+%7. `function delete(app)`: Uygulama silindiğinde çalışan kodu içerir. `UIFigure` özelliğini siler.
+

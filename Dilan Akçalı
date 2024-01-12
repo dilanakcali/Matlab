@@ -1,0 +1,147 @@
+%*************************************App Building WorkflowDesign an App(2/2) Add Components
+classdef myapp < matlab.apps.AppBase
+    % MATLAB uygulamasını temsil eden 'myapp' sınıfı, 'matlab.apps.AppBase' sınıfından türetilmiştir.
+    % Uygulama bileşenlerine karşılık gelen özellikler
+    properties (Access = public)
+        UIFigure       matlab.ui.Figure       % Uygulama penceresi
+        NewMazeButton  matlab.ui.control.Button % "New Maze" düğmesi
+        UIAxes         matlab.ui.control.UIAxes % Görselleştirmeler için kullanılan eksen
+    end
+    % Bileşenleri oluşturan metodlar
+    methods (Access = private)
+        % Uygulama bileşenlerini oluşturan metod
+        function createComponents(app)
+            % Uygulama penceresini oluştur ve gizli tut
+            app.UIFigure = uifigure('Visible', 'off');
+            % Pencerenin boyutunu ve konumunu ayarla
+            app.UIFigure.Position = [100 100 640 480];
+            % Pencerenin adını belirle
+            app.UIFigure.Name = 'MATLAB App';
+            % Görselleştirmeler için bir eksen oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            % Eksenin başlığını belirle
+            title(app.UIAxes, 'Maze')
+            % X ve Y eksenlerindeki işaretleri gizle
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            % Eksenin kenarlarını göster
+            app.UIAxes.Box = 'on';
+            % Eksenin konumunu ayarla
+            app.UIAxes.Position = [185 221 300 185];
+            % "New Maze" adlı bir düğme oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            % Düğmenin konumunu ayarla
+            app.NewMazeButton.Position = [285 154 100 23];
+            % Düğmenin metnini belirle
+            app.NewMazeButton.Text = 'New Maze';
+            % Pencereyi görünür yap
+            app.UIFigure.Visible = 'on';
+        end
+    end
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Uygulama oluşturan constructor metodu
+        function app = myapp
+            % Bileşenleri oluştur
+            createComponents(app)
+            % Uygulamayı App Designer'a kaydet
+            registerApp(app, app.UIFigure)
+            % Çıktı argümanı yoksa 'app' değişkenini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde pencereyi sil
+            delete(app.UIFigure)
+        end
+    end
+end
+
+
+%**********************************App Building WorkflowWrite Callbacks(3/3) Button Pushed Callback  
+
+classdef myapp < matlab.apps.AppBase
+    % Bu sınıf, MATLAB App Designer ile oluşturulan bir uygulamayı temsil eder
+    % ve 'matlab.apps.AppBase' sınıfından türetilmiştir.
+
+    % Uygulama bileşenlerine karşılık gelen özellikler
+    properties (Access = public)
+        UIFigure       matlab.ui.Figure          % Uygulama penceresini temsil eden bir 'matlab.ui.Figure' nesnesi
+        NewMazeButton  matlab.ui.control.Button  % "New Maze" adlı bir düğme bileşeni
+        UIAxes         matlab.ui.control.UIAxes  % Uygulama içindeki bir eksen bileşeni
+    end
+
+    % Bileşen olaylarını yöneten metodlar
+    methods (Access = private)
+        % NewMazeButton düğmesine basıldığında çalışacak fonksiyon
+        function NewMazeButtonPushed(app, event)
+            % amaze fonksiyonunu çağırarak labirenti oluştur
+            [wall, wx, wy] = amaze();
+            
+            % Uygulama penceresinde labirenti çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            
+            % Eksen ölçeklemesini eşitle
+            axis(app.UIAxes, "equal");
+        end
+    end
+
+    % Bileşen başlatma
+    methods (Access = private)
+        % UIFigure ve bileşenleri oluşturan metod
+        function createComponents(app)
+            % UIFigure oluştur ve tüm bileşenler oluşturulana kadar gizli tut
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 258 254]; % Pencerenin boyutu ve konumu
+            app.UIFigure.Name = 'MATLAB App'; % Pencerenin adı
+
+            % UIAxes oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze'); % Eksen başlığı
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [27 57 200 185]; % Eksenin konumu ve boyutu
+
+            % NewMazeButton oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMazeButtonPushed, true);
+            app.NewMazeButton.Position = [77 21 100 23]; % Düğmenin konumu ve boyutu
+            app.NewMazeButton.Text = 'New Maze';
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Constructor: Uygulamayı oluşturan metot
+        function app = myapp
+            % Bileşenleri ve uygulama penceresini oluştur
+            createComponents(app);
+            % Uygulamayı App Designer'a kaydet
+            registerApp(app, app.UIFigure);
+
+            % Çıktı argümanı yoksa 'app' değişkenini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+%
+          
+    

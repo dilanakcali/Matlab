@@ -1,0 +1,1065 @@
+%*************************************App Building WorkflowDesign an App(2/2) Add Components
+classdef myapp < matlab.apps.AppBase
+    % MATLAB uygulamasını temsil eden 'myapp' sınıfı, 'matlab.apps.AppBase' sınıfından türetilmiştir.
+    % Uygulama bileşenlerine karşılık gelen özellikler
+    properties (Access = public)
+        UIFigure       matlab.ui.Figure       % Uygulama penceresi
+        NewMazeButton  matlab.ui.control.Button % "New Maze" düğmesi
+        UIAxes         matlab.ui.control.UIAxes % Görselleştirmeler için kullanılan eksen
+    end
+    % Bileşenleri oluşturan metodlar
+    methods (Access = private)
+        % Uygulama bileşenlerini oluşturan metod
+        function createComponents(app)
+            % Uygulama penceresini oluştur ve gizli tut
+            app.UIFigure = uifigure('Visible', 'off');
+            % Pencerenin boyutunu ve konumunu ayarla
+            app.UIFigure.Position = [100 100 640 480];
+            % Pencerenin adını belirle
+            app.UIFigure.Name = 'MATLAB App';
+            % Görselleştirmeler için bir eksen oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            % Eksenin başlığını belirle
+            title(app.UIAxes, 'Maze')
+            % X ve Y eksenlerindeki işaretleri gizle
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            % Eksenin kenarlarını göster
+            app.UIAxes.Box = 'on';
+            % Eksenin konumunu ayarla
+            app.UIAxes.Position = [185 221 300 185];
+            % "New Maze" adlı bir düğme oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            % Düğmenin konumunu ayarla
+            app.NewMazeButton.Position = [285 154 100 23];
+            % Düğmenin metnini belirle
+            app.NewMazeButton.Text = 'New Maze';
+            % Pencereyi görünür yap
+            app.UIFigure.Visible = 'on';
+        end
+    end
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Uygulama oluşturan constructor metodu
+        function app = myapp
+            % Bileşenleri oluştur
+            createComponents(app)
+            % Uygulamayı App Designer'a kaydet
+            registerApp(app, app.UIFigure)
+            % Çıktı argümanı yoksa 'app' değişkenini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde pencereyi sil
+            delete(app.UIFigure)
+        end
+    end
+end
+
+
+%**********************************App Building WorkflowWrite Callbacks(3/3) Button Pushed Callback  
+
+classdef myapp < matlab.apps.AppBase
+    % Bu sınıf, MATLAB App Designer ile oluşturulan bir uygulamayı temsil eder
+    % ve 'matlab.apps.AppBase' sınıfından türetilmiştir.
+
+    % Uygulama bileşenlerine karşılık gelen özellikler
+    properties (Access = public)
+        UIFigure       matlab.ui.Figure          % Uygulama penceresini temsil eden bir 'matlab.ui.Figure' nesnesi
+        NewMazeButton  matlab.ui.control.Button  % "New Maze" adlı bir düğme bileşeni
+        UIAxes         matlab.ui.control.UIAxes  % Uygulama içindeki bir eksen bileşeni
+    end
+
+    % Bileşen olaylarını yöneten metodlar
+    methods (Access = private)
+        % NewMazeButton düğmesine basıldığında çalışacak fonksiyon
+        function NewMazeButtonPushed(app, event)
+            % amaze fonksiyonunu çağırarak labirenti oluştur
+            [wall, wx, wy] = amaze();
+            
+            % Uygulama penceresinde labirenti çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            
+            % Eksen ölçeklemesini eşitle
+            axis(app.UIAxes, "equal");
+        end
+    end
+
+    % Bileşen başlatma
+    methods (Access = private)
+        % UIFigure ve bileşenleri oluşturan metod
+        function createComponents(app)
+            % UIFigure oluştur ve tüm bileşenler oluşturulana kadar gizli tut
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 258 254]; % Pencerenin boyutu ve konumu
+            app.UIFigure.Name = 'MATLAB App'; % Pencerenin adı
+
+            % UIAxes oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze'); % Eksen başlığı
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [27 57 200 185]; % Eksenin konumu ve boyutu
+
+            % NewMazeButton oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMazeButtonPushed, true);
+            app.NewMazeButton.Position = [77 21 100 23]; % Düğmenin konumu ve boyutu
+            app.NewMazeButton.Text = 'New Maze';
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Constructor: Uygulamayı oluşturan metot
+        function app = myapp
+            % Bileşenleri ve uygulama penceresini oluştur
+            createComponents(app);
+            % Uygulamayı App Designer'a kaydet
+            registerApp(app, app.UIFigure);
+
+            % Çıktı argümanı yoksa 'app' değişkenini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+%
+          
+*********************classdef myapp < matlab.apps.AppBase
+    % MATLAB App Designer'da oluşturulan uygulamanın sınıf tanımı.
+
+    % Uygulama bileşenlerine ait özellikler
+    properties (Access = public)
+        UIFigure              matlab.ui.Figure          % Ana uygulama penceresi
+        GridSizeSpinner       matlab.ui.control.Spinner % Grid boyutunu seçmek için spinner
+        GridSizeSpinnerLabel  matlab.ui.control.Label   % Grid boyutunu belirten etiket
+        NewMazeButton         matlab.ui.control.Button  % Yeni labirent oluşturan düğme
+        UIAxes                matlab.ui.control.UIAxes % Labirenti göstermek için axes
+    end
+
+    % Bileşen olaylarını işleyen metodlar
+    methods (Access = private)
+        % Bileşen olaylarını işleyen özel metodlar
+
+        % Callback function: GridSizeSpinner, NewMazeButton
+        function NewMaze(app, event)
+            % Yeni bir labirent oluşturan metod
+            gridsize = app.GridSizeSpinner.Value;
+            
+            % 'amaze' fonksiyonunu kullanarak labirenti oluştur
+            [wall, wx, wy] = amaze(gridsize);
+            
+            % Labirenti UIAxes üzerinde çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            
+            % Eksenleri eşit hale getir
+            axis(app.UIAxes, "equal");
+        end
+    end
+
+    % Bileşen başlatma metodları
+    methods (Access = private)
+        % Bileşenleri başlatan özel metodlar
+
+        % Create UIFigure and components
+        function createComponents(app)
+            % Uygulama penceresini ve bileşenlerini oluşturan metod
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            
+            % UIFigure'ın konumu ve boyutu
+            app.UIFigure.Position = [100 100 321 254];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze');
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [63 57 200 185];
+
+            % Create NewMazeButton
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.NewMazeButton.Position = [184 35 100 23];
+            app.NewMazeButton.Text = 'New Maze';
+
+            % Create GridSizeSpinnerLabel
+            app.GridSizeSpinnerLabel = uilabel(app.UIFigure);
+            app.GridSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.GridSizeSpinnerLabel.Position = [5 35 54 22];
+            app.GridSizeSpinnerLabel.Text = 'Grid Size';
+
+            % Create GridSizeSpinner
+            app.GridSizeSpinner = uispinner(app.UIFigure);
+            app.GridSizeSpinner.Step = 5;
+            app.GridSizeSpinner.Limits = [5 30];
+            app.GridSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.GridSizeSpinner.Position = [74 35 100 22];
+            app.GridSizeSpinner.Value = 5;
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Uygulama oluşturma ve silme ile ilgili genel metodlar
+
+        % Construct app
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Create UIFigure and components
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % App silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+************************            % Dalga yayma modunu seçmek için düğme grubu oluştur
+            app.BranchingModeButtonGroup.Title = 'Branching Mode';
+            app.BranchingModeButtonGroup.Position = [28 18 123 106];
+
+            % İlk düğme
+            app.firstButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.firstButton.Text = 'first';
+            app.firstButton.Position = [11 52 100 23];
+            app.firstButton.Value = true;
+
+            % Orta düğme
+            app.middleButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.middleButton.Text = 'middle';
+            app.middleButton.Position = [11 31 100 23];
+
+            % Son düğme
+            app.lastButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.lastButton.Text = 'last';
+            app.lastButton.Position = [11 10 100 23];
+
+            % 'Display solution?' onay kutusu
+            app.DisplaysolutionCheckBox = uicheckbox(app.UIFigure);
+            app.DisplaysolutionCheckBox.ValueChangedFcn = createCallbackFcn(app, @DisplaysolutionCheckBoxValueChanged, true);
+            app.DisplaysolutionCheckBox.Text = 'Display solution?';
+            app.DisplaysolutionCheckBox.Position = [206 112 112 22];
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Uygulama oluşturma ve silme ile ilgili genel metodlar
+
+        % Uygulamayı oluştur
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Bileşenleri ve UI Figure'ı oluştur
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+**************************
+classdef myapp < matlab.apps.AppBase
+    % MATLAB App Designer'da oluşturulan uygulamanın sınıf tanımı.
+
+    % Uygulama bileşenlerine ait genel özellikler
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure                % Ana uygulama penceresi
+        DisplaysolutionCheckBox   matlab.ui.control.CheckBox     % Çözümü gösterme seçeneği için onay kutusu
+        BranchingModeButtonGroup  matlab.ui.container.ButtonGroup % Dalga yayma modunu seçmek için düğme grubu
+        lastButton                matlab.ui.control.ToggleButton % Son düğme
+        middleButton              matlab.ui.control.ToggleButton % Orta düğme
+        firstButton               matlab.ui.control.ToggleButton % İlk düğme
+        GridSizeSpinner           matlab.ui.control.Spinner      % Grid boyutunu seçmek için spinner
+        GridSizeSpinnerLabel      matlab.ui.control.Label        % Grid boyutunu belirten etiket
+        NewMazeButton             matlab.ui.control.Button       % Yeni labirent oluşturan düğme
+        UIAxes                    matlab.ui.control.UIAxes       % Labirenti göstermek için axes
+    end
+
+    % Özel özellikler
+    properties (Access = private)
+        slen % Çözüm uzunluğunu tutan özel özellik
+        solplot % Labirent çözümünü gösteren çizgi grafiği
+    end
+
+    % Bileşen olaylarını işleyen metodlar
+    methods (Access = private)
+        % Bileşen olaylarını işleyen özel metodlar
+
+        % Callback function: BranchingModeButtonGroup, GridSizeSpinner, ...ve 1 diğer bileşen
+        function NewMaze(app, event)
+            % Yeni bir labirent oluşturan metod
+            gridsize = app.GridSizeSpinner.Value;
+            bmode = app.BranchingModeButtonGroup.SelectedObject.Text;
+
+            % 'amaze' fonksiyonunu kullanarak labirenti ve çözümü oluştur
+            [wall, wx, wy, sol, sx, sy] = amaze(gridsize, bmode);
+
+            % Çözüm uzunluğunu güncelle
+            app.slen = numedges(sol);
+
+            % Labirenti UIAxes üzerinde çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            axis(app.UIAxes, "equal");
+            hold(app.UIAxes, "on");
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster
+            if app.DisplaysolutionCheckBox.Value
+                app.solplot = plot(app.UIAxes, sol, "XData", sx, "YData", sy, "NodeLabel", []);
+            end
+
+            hold(app.UIAxes, "off");
+        end
+
+        % Value changed function: DisplaysolutionCheckBox
+        function DisplaysolutionCheckBoxValueChanged(app, event)
+            % 'Display solution?' onay kutusu değeri değiştiğinde çağrılan metod
+            value = app.DisplaysolutionCheckBox.Value;
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster
+            if value
+                % Çözümü gösterme işlemleri buraya eklenebilir
+            else
+                % Çözümü gizleme işlemleri buraya eklenebilir
+            end
+        end
+    end
+
+    % Bileşen başlatma metodları
+    methods (Access = private)
+        % Bileşenleri başlatan özel metodlar
+
+        % UIFigure ve bileşenleri oluştur
+        function createComponents(app)
+            % Uygulama penceresini ve bileşenlerini oluşturan metod
+
+            % UIFigure'ı oluştur ve tüm bileşenleri oluşturana kadar gizle
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 316 372];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % UIAxes oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze');
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [63 175 200 185];
+
+            % NewMazeButton oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.NewMazeButton.Position = [205 141 100 23];
+            app.NewMazeButton.Text = 'New Maze';
+
+            % GridSizeSpinnerLabel oluştur
+            app.GridSizeSpinnerLabel = uilabel(app.UIFigure);
+            app.GridSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.GridSizeSpinnerLabel.Position = [4 141 54 22];
+            app.GridSizeSpinnerLabel.Text = 'Grid Size';
+
+            % GridSizeSpinner oluştur
+            app.GridSizeSpinner = uispinner(app.UIFigure);
+            app.GridSizeSpinner.Step = 5;
+            app.GridSizeSpinner.Limits = [5 30];
+            app.GridSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.GridSizeSpinner.Position = [73 141 100 22];
+            app.GridSizeSpinner.Value = 5;
+
+            % BranchingModeButtonGroup oluştur
+            app.BranchingModeButtonGroup = uibuttongroup(app.UIFigure);
+            app.BranchingModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.BranchingModeButtonGroup.Title = 'Branching Mode';
+            app.BranchingModeButtonGroup.Position = [28 18 123 106];
+
+            % firstButton oluştur
+            app.firstButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.firstButton.Text = 'first';
+            app.firstButton.Position = [11 52 100 23];
+            app.firstButton.Value = true;
+
+            % middleButton oluştur
+            app.middleButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.middleButton.Text = 'middle';
+            app.middleButton.Position = [11 31 100 23];
+
+            % lastButton oluştur
+            app.lastButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.lastButton.Text = 'last';
+            app.lastButton.Position = [11 10 100 23];
+
+            % DisplaysolutionCheckBox oluştur
+            app.DisplaysolutionCheckBox = uicheckbox(app.UIFigure);
+            app.DisplaysolutionCheckBox.ValueChangedFcn = createCallbackFcn(app, @DisplaysolutionCheckBoxValueChanged, true);
+            app.DisplaysolutionCheckBox.Text = 'Display solution?';
+            app.DisplaysolutionCheckBox.Position = [206 102 112 22];
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme
+    methods (Access = public)
+        % Uygulama oluşturma ve silme ile ilgili genel metodlar
+
+        % Uygulamayı oluştur
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Bileşenleri ve UI Figure'ı oluştur
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+*************************
+classdef myapp < matlab.apps.AppBase
+    % MATLAB App Designer tarafından oluşturulan uygulamanın sınıf tanımı.
+
+    % Uygulama bileşenlerine ait genel özellikler
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure                % Ana uygulama penceresi
+        DisplaysolutionCheckBox   matlab.ui.control.CheckBox     % Çözümü gösterme seçeneği için onay kutusu
+        BranchingModeButtonGroup  matlab.ui.container.ButtonGroup % Dalga yayma modunu seçmek için düğme grubu
+        lastButton                matlab.ui.control.ToggleButton % Son düğme
+        middleButton              matlab.ui.control.ToggleButton % Orta düğme
+        firstButton               matlab.ui.control.ToggleButton % İlk düğme
+        GridSizeSpinner           matlab.ui.control.Spinner      % Grid boyutunu seçmek için spinner
+        GridSizeSpinnerLabel      matlab.ui.control.Label        % Grid boyutunu belirten etiket
+        NewMazeButton             matlab.ui.control.Button       % Yeni labirent oluşturan düğme
+        UIAxes                    matlab.ui.control.UIAxes       % Labirenti göstermek için axes
+    end
+
+    % Özel özellikler
+    properties (Access = private)
+        slen % Labirentin çözüm uzunluğunu tutan özel özellik
+        solplot % Çözümü gösteren çizgi grafiğinin işaretçisi
+    end
+
+    % Bileşen olaylarını işleyen metodlar
+    methods (Access = private)
+        % Bileşen olaylarını işleyen özel metodlar
+
+        % Callback function: BranchingModeButtonGroup, GridSizeSpinner, ...ve 1 diğer bileşen
+        function NewMaze(app, event)
+            % Yeni bir labirent oluşturan metod
+            gridsize = app.GridSizeSpinner.Value;
+            bmode = app.BranchingModeButtonGroup.SelectedObject.Text;
+
+            % 'amaze' fonksiyonunu kullanarak labirenti ve çözümü oluştur
+            [wall, wx, wy, sol, sx, sy] = amaze(gridsize, bmode);
+
+            % Labirentin çözüm uzunluğunu güncelle
+            app.slen = numedges(sol);
+
+            % Labirenti UIAxes üzerinde çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            axis(app.UIAxes, "equal");
+            hold(app.UIAxes, "on");
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster
+            app.solplot = plot(app.UIAxes, sol, "XData", sx, "YData", sy, "NodeLabel", []);
+            app.solplot.Visible = false; % Çözümü başlangıçta gizle
+
+            hold(app.UIAxes, "off");
+
+            % DisplaysolutionCheckBoxValueChanged metodunu çağırarak gerekli güncellemeleri yap
+            DisplaysolutionCheckBoxValueChanged(app, []);
+        end
+
+        % Value changed function: DisplaysolutionCheckBox
+        function DisplaysolutionCheckBoxValueChanged(app, event)
+            % 'Display solution?' onay kutusu değeri değiştiğinde çağrılan metod
+            value = app.DisplaysolutionCheckBox.Value;
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster ve başlık güncelle
+            if value
+                app.solplot.Visible = true;
+                title(app.UIAxes, "length = " + app.slen);
+            else
+                app.solplot.Visible = false;
+                title(app.UIAxes, "Maze");
+            end
+        end
+    end
+
+    % Bileşen başlatma metodları
+    methods (Access = private)
+        % Bileşenleri başlatan özel metodlar
+
+        % UIFigure ve bileşenleri oluştur
+        function createComponents(app)
+            % Uygulama penceresini ve bileşenlerini oluşturan metod
+
+            % UIFigure'ı oluştur ve tüm bileşenleri oluşturana kadar gizle
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 316 372];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % UIAxes oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze');
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [63 175 200 185];
+
+            % NewMazeButton oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.NewMazeButton.Position = [205 141 100 23];
+            app.NewMazeButton.Text = 'New Maze';
+
+            % GridSizeSpinnerLabel oluştur
+            app.GridSizeSpinnerLabel = uilabel(app.UIFigure);
+            app.GridSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.GridSizeSpinnerLabel.Position = [4 141 54 22];
+            app.GridSizeSpinnerLabel.Text = 'Grid Size';
+
+            % GridSizeSpinner oluştur
+            app.GridSizeSpinner = uispinner(app.UIFigure);
+            app.GridSizeSpinner.Step = 5;
+            app.GridSizeSpinner.Limits = [5 30];
+            app.GridSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.GridSizeSpinner.Position = [73 141 100 22];
+            app.GridSizeSpinner.Value = 5;
+
+            % BranchingModeButtonGroup oluştur
+            app.BranchingModeButtonGroup = uibuttongroup(app.UIFigure);
+            app.BranchingModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.BranchingModeButtonGroup.Title = 'Branching Mode';
+            app.BranchingModeButtonGroup.Position = [28 18 123 106];
+
+            % firstButton oluştur
+            app.firstButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.firstButton.Text = 'first';
+            app.firstButton.Position = [11 52 100 23];
+            app.firstButton.Value = true;
+
+            % middleButton oluştur
+            app.middleButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.middleButton.Text = 'middle';
+            app.middleButton.Position = [11 31 100 23];
+
+            % lastButton oluştur
+            app.lastButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.lastButton.Text = 'last';
+            app.lastButton.Position = [11 10 100 23];
+
+            % DisplaysolutionCheckBox oluştur
+            app.DisplaysolutionCheckBox = uicheckbox(app.UIFigure);
+            app.DisplaysolutionCheckBox.ValueChangedFcn = createCallbackFcn(app, @DisplaysolutionCheckBoxValueChanged, true);
+            app.DisplaysolutionCheckBox.Text = 'Display solution?';
+            app.DisplaysolutionCheckBox.Position = [206 102 112 22];
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme metodları
+    methods (Access = public)
+        % Genel metodlar: Uygulama oluşturma ve silme
+
+        % Uygulama objesini oluştur
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Bileşenleri ve UI Figure'ı oluştur
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+*************************
+classdef myapp < matlab.apps.AppBase
+    % MATLAB App Designer tarafından oluşturulan uygulamanın sınıf tanımı.
+
+    % Uygulama bileşenlerine ait genel özellikler
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure                % Ana uygulama penceresi
+        ResetButton               matlab.ui.control.Button        % Labirenti sıfırlama düğmesi
+        DisplaysolutionCheckBox   matlab.ui.control.CheckBox     % Çözümü gösterme seçeneği için onay kutusu
+        BranchingModeButtonGroup  matlab.ui.container.ButtonGroup % Dalga yayma modunu seçmek için düğme grubu
+        lastButton                matlab.ui.control.ToggleButton % Son düğme
+        middleButton              matlab.ui.control.ToggleButton % Orta düğme
+        firstButton               matlab.ui.control.ToggleButton % İlk düğme
+        GridSizeSpinner           matlab.ui.control.Spinner      % Grid boyutunu seçmek için spinner
+        GridSizeSpinnerLabel      matlab.ui.control.Label        % Grid boyutunu belirten etiket
+        NewMazeButton             matlab.ui.control.Button       % Yeni labirent oluşturan düğme
+        UIAxes                    matlab.ui.control.UIAxes       % Labirenti göstermek için axes
+    end
+
+    % Özel özellikler
+    properties (Access = private)
+        slen % Labirentin çözüm uzunluğunu tutan özel özellik
+        solplot % Çözümü gösteren çizgi grafiğinin işaretçisi
+    end
+
+    % Bileşen olaylarını işleyen metodlar
+    methods (Access = private)
+        % Bileşen olaylarını işleyen özel metodlar
+
+        % Callback function: BranchingModeButtonGroup, GridSizeSpinner, ...ve 1 diğer bileşen
+        function NewMaze(app, event)
+            % Yeni bir labirent oluşturan metod
+            gridsize = app.GridSizeSpinner.Value;
+            bmode = app.BranchingModeButtonGroup.SelectedObject.Text;
+
+            % 'amaze' fonksiyonunu kullanarak labirenti ve çözümü oluştur
+            [wall, wx, wy, sol, sx, sy] = amaze(gridsize, bmode);
+
+            % Labirentin çözüm uzunluğunu güncelle
+            app.slen = numedges(sol);
+
+            % Labirenti UIAxes üzerinde çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            axis(app.UIAxes, "equal");
+            hold(app.UIAxes, "on");
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster
+            app.solplot = plot(app.UIAxes, sol, "XData", sx, "YData", sy, "NodeLabel", []);
+            app.solplot.Visible = false; % Çözümü başlangıçta gizle
+
+            hold(app.UIAxes, "off");
+
+            % DisplaysolutionCheckBoxValueChanged metodunu çağırarak gerekli güncellemeleri yap
+            DisplaysolutionCheckBoxValueChanged(app, []);
+        end
+
+        % Value changed function: DisplaysolutionCheckBox
+        function DisplaysolutionCheckBoxValueChanged(app, event)
+            % 'Display solution?' onay kutusu değeri değiştiğinde çağrılan metod
+            value = app.DisplaysolutionCheckBox.Value;
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster ve başlık güncelle
+            if value
+                app.solplot.Visible = true;
+                title(app.UIAxes, "length = " + app.slen);
+            else
+                app.solplot.Visible = false;
+                title(app.UIAxes, "Maze");
+            end
+        end
+
+        % Button pushed function: ResetButton
+        function ResetButtonPushed(app, event)
+            % 'Reset' düğmesine basıldığında çağrılan metod
+            cla(app.UIAxes); % UIAxes temizle
+            title(app.UIAxes, "Maze"); % Başlığı 'Maze' olarak ayarla
+            app.DisplaysolutionCheckBox.Enable = 'off'; % 'Display solution?' seçeneğini devre dışı bırak
+        end
+    end
+
+    % Bileşen başlatma metodları
+    methods (Access = private)
+        % Bileşenleri başlatan özel metodlar
+
+        % UIFigure ve bileşenleri oluştur
+        function createComponents(app)
+            % Uygulama penceresini ve bileşenlerini oluşturan metod
+
+            % UIFigure'ı oluştur ve tüm bileşenleri oluşturana kadar gizle
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 316 372];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % UIAxes oluştur
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Maze');
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Position = [63 175 200 185];
+
+            % NewMazeButton oluştur
+            app.NewMazeButton = uibutton(app.UIFigure, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.NewMazeButton.Position = [205 141 100 23];
+            app.NewMazeButton.Text = 'New Maze';
+
+            % GridSizeSpinnerLabel oluştur
+            app.GridSizeSpinnerLabel = uilabel(app.UIFigure);
+            app.GridSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.GridSizeSpinnerLabel.Position = [4 141 54 22];
+            app.GridSizeSpinnerLabel.Text = 'Grid Size';
+
+            % GridSizeSpinner oluştur
+            app.GridSizeSpinner = uispinner(app.UIFigure);
+            app.GridSizeSpinner.Step = 5;
+            app.GridSizeSpinner.Limits = [5 30];
+            app.GridSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.GridSizeSpinner.Position = [73 141 100 22];
+            app.GridSizeSpinner.Value = 5;
+
+            % BranchingModeButtonGroup oluştur
+            app.BranchingModeButtonGroup = uibuttongroup(app.UIFigure);
+            app.BranchingModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.BranchingModeButtonGroup.Title = 'Branching Mode';
+            app.BranchingModeButtonGroup.Position = [28 18 123 106];
+
+            % firstButton oluştur
+            app.firstButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.firstButton.Text = 'first';
+            app.firstButton.Position = [11 52 100 23];
+            app.firstButton.Value = true;
+
+            % middleButton oluştur
+            app.middleButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.middleButton.Text = 'middle';
+            app.middleButton.Position = [11 31 100 23];
+
+            % lastButton oluştur
+            app.lastButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.lastButton.Text = 'last';
+            app.lastButton.Position = [11 10 100 23];
+
+            % DisplaysolutionCheckBox oluştur
+            app.DisplaysolutionCheckBox = uicheckbox(app.UIFigure);
+            app.DisplaysolutionCheckBox.ValueChangedFcn = createCallbackFcn(app, @DisplaysolutionCheckBoxValueChanged, true);
+            app.DisplaysolutionCheckBox.Enable = 'off';
+            app.DisplaysolutionCheckBox.Text = 'Display solution?';
+            app.DisplaysolutionCheckBox.Position = [206 39 112 22];
+
+            % ResetButton oluştur
+            app.ResetButton = uibutton(app.UIFigure, 'push');
+            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
+            app.ResetButton.Position = [206 102 100 22];
+            app.ResetButton.Text = 'Reset';
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme metodları
+    methods (Access = public)
+        % Genel metodlar: Uygulama oluşturma ve silme
+
+        % Uygulama objesini oluştur
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Bileşenleri ve UI Figure'ı oluştur
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
+******************************KODLARIN SON HALİ
+classdef myapp < matlab.apps.AppBase
+    % MATLAB App Designer tarafından oluşturulan uygulamanın sınıf tanımı.
+
+    % Uygulama bileşenlerine ait genel özellikler
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure                % Ana uygulama penceresi
+        GridLayout                matlab.ui.container.GridLayout  % Grid düzeni
+        GridSizeSpinner           matlab.ui.control.Spinner      % Grid boyutunu seçmek için spinner
+        GridSizeSpinnerLabel      matlab.ui.control.Label        % Grid boyutunu belirten etiket
+        ResetButton               matlab.ui.control.Button       % Labirenti sıfırlama düğmesi
+        DisplaysolutionCheckBox   matlab.ui.control.CheckBox     % Çözümü gösterme seçeneği için onay kutusu
+        BranchingModeButtonGroup  matlab.ui.container.ButtonGroup % Dalga yayma modunu seçmek için düğme grubu
+        lastButton                matlab.ui.control.ToggleButton % Son düğme
+        middleButton              matlab.ui.control.ToggleButton % Orta düğme
+        firstButton               matlab.ui.control.ToggleButton % İlk düğme
+        NewMazeButton             matlab.ui.control.Button       % Yeni labirent oluşturan düğme
+        UIAxes                    matlab.ui.control.UIAxes       % Labirenti göstermek için axes
+    end
+
+    % Özel özellikler
+    properties (Access = private)
+        slen % Labirentin çözüm uzunluğunu tutan özel özellik
+        solplot % Çözümü gösteren çizgi grafiğinin işaretçisi
+    end
+
+    % Bileşen olaylarını işleyen metodlar
+    methods (Access = private)
+        % Bileşen olaylarını işleyen özel metodlar
+
+        % Callback function: BranchingModeButtonGroup, GridSizeSpinner, ...ve 1 diğer bileşen
+        function NewMaze(app, event)
+            % Yeni bir labirent oluşturan metod
+            gridsize = app.GridSizeSpinner.Value;
+            bmode = app.BranchingModeButtonGroup.SelectedObject.Text;
+
+            % 'amaze' fonksiyonunu kullanarak labirenti ve çözümü oluştur
+            [wall, wx, wy, sol, sx, sy] = amaze(gridsize, bmode);
+
+            % Labirentin çözüm uzunluğunu güncelle
+            app.slen = numedges(sol);
+
+            % Labirenti UIAxes üzerinde çiz
+            plot(app.UIAxes, wall, "XData", wx, "YData", wy, "NodeLabel", []);
+            axis(app.UIAxes, "equal");
+            hold(app.UIAxes, "on");
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster
+            app.solplot = plot(app.UIAxes, sol, "XData", sx, "YData", sy, "NodeLabel", []);
+            app.solplot.Visible = false; % Çözümü başlangıçta gizle
+
+            hold(app.UIAxes, "off");
+
+            % DisplaysolutionCheckBoxValueChanged metodunu çağırarak gerekli güncellemeleri yap
+            DisplaysolutionCheckBoxValueChanged(app, []);
+        end
+
+        % Value changed function: DisplaysolutionCheckBox
+        function DisplaysolutionCheckBoxValueChanged(app, event)
+            % 'Display solution?' onay kutusu değeri değiştiğinde çağrılan metod
+            value = app.DisplaysolutionCheckBox.Value;
+
+            % Çözümü gösterme seçeneği işaretliyse, çözümü çizgi grafiği ile göster ve başlık güncelle
+            if value
+                app.solplot.Visible = true;
+                title(app.UIAxes, "length = " + app.slen);
+            else
+                app.solplot.Visible = false;
+                title(app.UIAxes, "Maze");
+            end
+        end
+
+        % Button pushed function: ResetButton
+        function ResetButtonPushed(app, event)
+            % 'Reset' düğmesine basıldığında çağrılan metod
+            cla(app.UIAxes); % UIAxes temizle
+            title(app.UIAxes, "Maze"); % Başlığı 'Maze' olarak ayarla
+            app.DisplaysolutionCheckBox.Enable = 'off'; % 'Display solution?' seçeneğini devre dışı bırak
+        end
+    end
+
+    % Bileşen başlatma metodları
+    methods (Access = private)
+        % Bileşenleri başlatan özel metodlar
+
+        % UIFigure ve bileşenleri oluştur
+        function createComponents(app)
+            % Uygulama penceresini ve bileşenlerini oluşturan metod
+
+            % UIFigure'ı oluştur ve tüm bileşenleri oluşturana kadar gizle
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 316 372];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % GridLayout'u oluştur
+            app.GridLayout = uigridlayout(app.UIFigure);
+            app.GridLayout.ColumnWidth = {54, 64, 'fit', '1.17x', 58, 54};
+            app.GridLayout.RowHeight = {'1x', 23, 22, 20, 22, 42};
+            app.GridLayout.ColumnSpacing = 1.14285714285714;
+            app.GridLayout.RowSpacing = 8.28571428571429;
+            app.GridLayout.Padding = [1.14285714285714 8.28571428571429 1.14285714285714 8.28571428571429];
+
+            % UIAxes'u oluştur
+            app.UIAxes = uiaxes(app.GridLayout);
+            title(app.UIAxes, 'Maze');
+            app.UIAxes.XTick = [];
+            app.UIAxes.XTickLabel = '';
+            app.UIAxes.YTick = [];
+            app.UIAxes.YTickLabel = '';
+            app.UIAxes.Box = 'on';
+            app.UIAxes.Layout.Row = 1;
+            app.UIAxes.Layout.Column = [2 5];
+
+            % NewMazeButton'ı oluştur
+            app.NewMazeButton = uibutton(app.GridLayout, 'push');
+            app.NewMazeButton.ButtonPushedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.NewMazeButton.Layout.Row = 2;
+            app.NewMazeButton.Layout.Column = [5 6];
+            app.NewMazeButton.Text = 'New Maze';
+
+            % BranchingModeButtonGroup'u oluştur
+            app.BranchingModeButtonGroup = uibuttongroup(app.GridLayout);
+            app.BranchingModeButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.BranchingModeButtonGroup.Title = 'Branching Mode';
+            app.BranchingModeButtonGroup.Layout.Row = [3 6];
+            app.BranchingModeButtonGroup.Layout.Column = [1 2];
+
+            % firstButton'ı oluştur
+            app.firstButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.firstButton.Text = 'first';
+            app.firstButton.Position = [11 77 100 23];
+            app.firstButton.Value = true;
+
+            % middleButton'ı oluştur
+            app.middleButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.middleButton.Text = 'middle';
+            app.middleButton.Position = [11 56 100 23];
+
+            % lastButton'ı oluştur
+            app.lastButton = uitogglebutton(app.BranchingModeButtonGroup);
+            app.lastButton.Text = 'last';
+            app.lastButton.Position = [11 35 100 23];
+
+            % DisplaysolutionCheckBox'u oluştur
+            app.DisplaysolutionCheckBox = uicheckbox(app.GridLayout);
+            app.DisplaysolutionCheckBox.ValueChangedFcn = createCallbackFcn(app, @DisplaysolutionCheckBoxValueChanged, true);
+            app.DisplaysolutionCheckBox.Enable = 'off';
+            app.DisplaysolutionCheckBox.Text = 'Display solution?';
+            app.DisplaysolutionCheckBox.Layout.Row = 5;
+            app.DisplaysolutionCheckBox.Layout.Column = [5 6];
+
+            % ResetButton'ı oluştur
+            app.ResetButton = uibutton(app.GridLayout, 'push');
+            app.ResetButton.ButtonPushedFcn = createCallbackFcn(app, @ResetButtonPushed, true);
+            app.ResetButton.Layout.Row = 3;
+            app.ResetButton.Layout.Column = [5 6];
+            app.ResetButton.Text = 'Reset';
+
+            % GridSizeSpinnerLabel'ı oluştur
+            app.GridSizeSpinnerLabel = uilabel(app.GridLayout);
+            app.GridSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.GridSizeSpinnerLabel.Layout.Row = 2;
+            app.GridSizeSpinnerLabel.Layout.Column = 1;
+            app.GridSizeSpinnerLabel.Text = 'Grid Size';
+
+            % GridSizeSpinner'ı oluştur
+            app.GridSizeSpinner = uispinner(app.GridLayout);
+            app.GridSizeSpinner.Step = 5;
+            app.GridSizeSpinner.Limits = [5 30];
+            app.GridSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @NewMaze, true);
+            app.GridSizeSpinner.Layout.Row = 2;
+            app.GridSizeSpinner.Layout.Column = [2 3];
+            app.GridSizeSpinner.Value = 5;
+
+            % Tüm bileşenler oluşturulduktan sonra pencereyi göster
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % Uygulama oluşturma ve silme metodları
+    methods (Access = public)
+        % Genel metodlar: Uygulama oluşturma ve silme
+
+        % Uygulama objesini oluştur
+        function app = myapp
+            % Uygulama objesini oluşturan inşa edici metod
+
+            % Bileşenleri ve UI Figure'ı oluştur
+            createComponents(app);
+
+            % App Designer ile uygulamayı kaydet
+            registerApp(app, app.UIFigure);
+
+            % Eğer çıkış değeri beklenmiyorsa app objesini temizle
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Uygulama silinmeden önce çalışan kod
+        function delete(app)
+            % Uygulama silindiğinde çalışan metod
+
+            % UIFigure'ı sil
+            delete(app.UIFigure);
+        end
+    end
+end
